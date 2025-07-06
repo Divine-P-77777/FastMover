@@ -4,6 +4,8 @@ import "./globals.css";
 import { Provider } from './Provider'
 import Navbar from "@/components/common/Navbar";
 import Script from 'next/script';
+import Footer from "@/components/common/Footer";
+
 
 
 
@@ -47,6 +49,7 @@ export default function RootLayout({
          <Provider>
         <Navbar />
        {children}
+       <Footer />
        </Provider>
       </body>
     </html>

@@ -6,61 +6,68 @@ import { useEffect, useRef } from 'react';
 import { useAppSelector } from '@/store/hooks';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
-import { ArrowRight, Truck, Users, Hammer, PhoneCall } from 'lucide-react';
+import { Truck, Users, Hammer } from 'lucide-react';
+
+// Extend refs for type safety
+interface StepRefs extends HTMLLIElement {}
+interface CardRefs extends HTMLDivElement {}
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function HomePage() {
   const isDarkMode = useAppSelector((state) => state.theme.isDarkMode);
 
-  const heroRef = useRef(null);
-  const stepsRef = useRef<(HTMLDivElement | null)[]>([]); 
-  const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const heroRef = useRef<HTMLDivElement | null>(null);
+  const stepsRef = useRef<Array<StepRefs | null>>([]);
+  const cardsRef = useRef<Array<CardRefs | null>>([]);
 
   useEffect(() => {
-    gsap.fromTo(
-      heroRef.current,
-      { opacity: 0, y: 50 },
-      { opacity: 1, y: 0, duration: 1, ease: 'power2.out' }
-    );
+    if (heroRef.current) {
+      gsap.fromTo(
+        heroRef.current,
+        { opacity: 0, y: 50 },
+        { opacity: 1, y: 0, duration: 1, ease: 'power2.out' }
+      );
+    }
 
     cardsRef.current.forEach((card, i) => {
-  if (card) {
-    gsap.fromTo(
-      card,
-      { opacity: 0, y: 50 },
-      {
-        scrollTrigger: {
-          trigger: card,
-          start: 'top 80%',
-        },
-        opacity: 1,
-        y: 0,
-        duration: 0.7,
-        delay: i * 0.1,
-        ease: 'power2.out',
+      if (card) {
+        gsap.fromTo(
+          card,
+          { opacity: 0, y: 50 },
+          {
+            scrollTrigger: {
+              trigger: card,
+              start: 'top 80%',
+            },
+            opacity: 1,
+            y: 0,
+            duration: 0.7,
+            delay: i * 0.1,
+            ease: 'power2.out',
+          }
+        );
       }
-    );
-  }
-});
+    });
 
-
-    gsap.utils.toArray(stepsRef.current).forEach((step:any, i) => {
-      gsap.fromTo(
-        step,
-        { opacity: 0, x: -50 },
-        {
-          scrollTrigger: {
-            trigger: step,
-            start: 'top 80%',
-          },
-          opacity: 1,
-          x: 0,
-          duration: 0.7,
-          delay: i * 0.15,
-          ease: 'power2.out',
-        }
-      );
+    stepsRef.current.forEach((step, i) => {
+      if (step) {
+        gsap.fromTo(
+          step,
+          { opacity: 0, x: -50 },
+          {
+            scrollTrigger: {
+              trigger: step,
+              start: 'top 80%',
+            },
+            opacity: 1,
+            x: 0,
+            duration: 0.7,
+            delay: i * 0.15,
+            ease: 'power2.out',
+          }
+        );
+      }
     });
   }, []);
 
@@ -74,18 +81,16 @@ export default function HomePage() {
 
   return (
     <main style={{ backgroundColor: theme.background, color: theme.text }}>
-
-      {/* 1. Hero Section */}
-   <section
-  className="min-h-screen px-6 py-20 bg-cover bg-center flex flex-col justify-center items-center text-center"
-  style={{
-    backgroundImage: "url('/images/truck-doorstep.jpg')",
-    backgroundColor: "rgba(0,0,0,0.4)",
-    backgroundBlendMode: "darken",
-    color: isDarkMode ? '#f3f4f6' : '#111827',
-  }}
->
-
+      <section
+        ref={heroRef}
+        className="min-h-screen px-6 py-20 bg-cover bg-center flex flex-col justify-center items-center text-center pt-25"
+        style={{
+          backgroundImage: "url('/images/truck-doorstep.jpg')",
+          backgroundColor: 'rgba(0,0,0,0.4)',
+          backgroundBlendMode: 'darken',
+          color: theme.text,
+        }}
+      >
         <h1 className="text-4xl md:text-6xl font-extrabold text-orange-600">
           Move Smarter. Build Faster. With FastMover.
         </h1>
@@ -103,7 +108,6 @@ export default function HomePage() {
         <Image src="/stuffs/truckgif.gif" alt="Truck Animation" width={300} height={300} className="mt-10 rounded-2xl" />
       </section>
 
-      {/* 2. Why FastMover */}
       <section className="min-h-screen flex flex-col justify-center px-6 py-20" style={{ backgroundColor: theme.section }}>
         <h2 className="text-3xl md:text-5xl font-bold text-center mb-12">Why FastMover?</h2>
         <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
@@ -121,24 +125,22 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. How It Works */}
       <section className="min-h-screen px-6 py-20 flex flex-col items-center">
         <h2 className="text-3xl md:text-5xl font-bold mb-12">How It Works</h2>
         <ol className="relative border-l border-orange-500 max-w-xl">
           {['Select Pickup & Drop Location', 'Choose Vehicle + Labor', 'Admin Confirms → Driver Assigned', 'Track, Pay, and Done!'].map((step, index) => (
             <li
               key={index}
-              ref={el => stepsRef.current[index] = el}
+              ref={(el: HTMLLIElement | null) => { stepsRef.current[index] = el; }}
               className="mb-10 ml-6"
             >
               <span className="absolute flex items-center justify-center w-6 h-6 bg-orange-500 rounded-full -left-3">{index + 1}</span>
-              <h3 className="font-semibold">{step}</h3>
+              <h3 className="font-semibold ml-6">{step}</h3>
             </li>
           ))}
         </ol>
       </section>
 
-      {/* 4. For Drivers */}
       <section className="min-h-screen px-6 py-20 text-center" style={{ backgroundColor: theme.section }}>
         <h2 className="text-3xl md:text-5xl font-bold mb-6">Own a Vehicle? Start Earning Today.</h2>
         <p className="mb-6 text-lg">Real clients. Flexible hours. Admin support.</p>
@@ -149,7 +151,7 @@ export default function HomePage() {
           {[{ icon: <Truck />, label: 'Verified Bookings' }, { icon: <Users />, label: 'Local Community' }, { icon: <Hammer />, label: 'Tools Provided' }].map((item, i) => (
             <div
               key={i}
-              ref={el => cardsRef.current[i] = el}
+              ref={(el: HTMLDivElement | null) => { cardsRef.current[i] = el; }}
               className="p-6 rounded shadow flex flex-col items-center"
               style={{ backgroundColor: theme.card }}
             >
@@ -160,7 +162,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 5. Final CTA */}
       <section
         className="min-h-screen px-6 py-20 bg-cover bg-center flex flex-col justify-center items-center text-center"
         style={{ backgroundImage: "url('/images/truck-doorstep.jpg')" }}
@@ -178,7 +179,6 @@ export default function HomePage() {
           Email: support@fastmover.in | WhatsApp: +91-9876543210 | Helpline: 1800-123-456 | Mumbai
         </div>
       </section>
-
     </main>
   );
 }

@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/supabase/client';
-import  Button  from '@/components/ui/Button';
-import { toast } from '@/hooks/use-toast';
+import Button from '@/components/ui/Button';
 import { Shield } from 'lucide-react';
 
 export default function AdminLoginForm() {
@@ -13,30 +12,33 @@ export default function AdminLoginForm() {
 
   const handleLogin = async () => {
     try {
-     
+      setLoading(true);
+
+      // Sign out existing session to avoid conflicts
       await supabase.auth.signOut();
-      
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/auth/admin-login-callback`,
           queryParams: {
             access_type: 'offline',
-            prompt: 'consent'
-          }
-        }
+            prompt: 'consent',
+          },
+        },
       });
-  
+
       if (error) {
-        toast.error('Google login failed');
-        console.error(error);
+        alert('Google login failed.');
+        console.error('OAuth Error:', error);
       }
     } catch (err) {
-      toast.error('Unexpected login error');
-      console.error(err);
+      alert('Unexpected login error.');
+      console.error('Login Error:', err);
+    } finally {
+      setLoading(false);
     }
   };
-  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">

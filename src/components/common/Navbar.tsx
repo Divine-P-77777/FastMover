@@ -4,7 +4,15 @@ import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { useAuth } from '@/hooks/useAuth';
-import { Moon, Sun, UserCircle2, LogOut, User, Menu, X } from 'lucide-react';
+import {
+  Moon,
+  Sun,
+  UserCircle2,
+  LogOut,
+  User,
+  Menu,
+  X,
+} from 'lucide-react';
 import { toggleDarkMode } from '@/store/themeSlice';
 
 export default function Navbar() {
@@ -18,12 +26,12 @@ export default function Navbar() {
   const profileRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  // FastMover Theme Colors
   const theme = {
-    primary: isDark ? '#ff8833' : '#ff6a00',
-    secondary: isDark ? '#1f1f1f' : '#f8fafc',
-    background: isDark ? '#121212' : '#ffffff',
-    foreground: isDark ? '#f3f4f6' : '#111827',
-    border: isDark ? '#374151' : '#d1d5db',
+    background: isDark ? '#082238' : '#0B5FAC',
+    foreground: '#ffffff',
+    border: isDark ? '#1e3a5f' : '#ffffff4d',
+    accent: '#ff8833',
   };
 
   useEffect(() => {
@@ -42,20 +50,21 @@ export default function Navbar() {
   return (
     <nav
       style={{
-        backgroundColor: theme.secondary,
+        backgroundColor: theme.background,
         color: theme.foreground,
         boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
       }}
       className="w-full px-6 py-3 flex items-center justify-between fixed top-0 left-0 right-0 z-50"
     >
-      <Link href="/" className="text-xl font-bold" style={{ color: theme.primary }}>
+      <Link href="/" className="text-xl font-bold" style={{ color: theme.foreground }}>
         FastMover
       </Link>
 
+      {/* Desktop Nav */}
       <div className="hidden md:flex items-center gap-6">
-        <Link href="/about" className="hover:opacity-75" style={{ color: theme.foreground }}>About</Link>
-        <Link href="/book" className="hover:opacity-75" style={{ color: theme.foreground }}>Book</Link>
-        <Link href="/contact" className="hover:opacity-75" style={{ color: theme.foreground }}>Contact</Link>
+        <Link href="/about" className="hover:text-orange-300" style={{ color: theme.foreground }}>About</Link>
+        <Link href="/book" className="hover:text-orange-300" style={{ color: theme.foreground }}>Book</Link>
+        <Link href="/contact" className="hover:text-orange-300" style={{ color: theme.foreground }}>Contact</Link>
 
         <button
           onClick={() => dispatch(toggleDarkMode())}
@@ -63,11 +72,10 @@ export default function Navbar() {
             padding: '6px',
             borderRadius: '9999px',
             backgroundColor: theme.border,
-            transition: 'background-color 0.2s',
           }}
           aria-label="Toggle dark mode"
         >
-          {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          {isDark ? <Sun className="w-5 h-5 text-white" /> : <Moon className="w-5 h-5 text-white" />}
         </button>
 
         {user ? (
@@ -82,10 +90,10 @@ export default function Navbar() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: theme.primary,
+                color: theme.accent,
               }}
             >
-              <UserCircle2 className="w-6 h-6" />
+              <UserCircle2 color='#fff' className="w-6 h-6" />
             </button>
 
             {profileOpen && (
@@ -100,13 +108,13 @@ export default function Navbar() {
                 <Link
                   href="/profile"
                   onClick={() => setProfileOpen(false)}
-                  className="flex items-center gap-2 px-4 py-2 hover:opacity-80"
+                  className="flex items-center gap-2 px-4 py-2 hover:bg-white/10"
                 >
                   <User className="w-4 h-4" /> My Profile
                 </Link>
                 <button
                   onClick={signOut}
-                  className="w-full text-left flex items-center gap-2 px-4 py-2 hover:opacity-80"
+                  className="w-full text-left flex items-center gap-2 px-4 py-2 hover:bg-white/10"
                 >
                   <LogOut className="w-4 h-4" /> Logout
                 </button>
@@ -118,7 +126,7 @@ export default function Navbar() {
             href="/auth"
             style={{
               padding: '8px 16px',
-              backgroundColor: theme.primary,
+              backgroundColor: theme.accent,
               color: '#fff',
               borderRadius: '6px',
             }}
@@ -128,6 +136,7 @@ export default function Navbar() {
         )}
       </div>
 
+      {/* Mobile Toggle */}
       <div className="md:hidden flex items-center gap-2">
         <button
           onClick={() => dispatch(toggleDarkMode())}
@@ -138,7 +147,7 @@ export default function Navbar() {
           }}
           aria-label="Toggle dark mode"
         >
-          {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          {isDark ? <Sun className="w-5 h-5 text-white" /> : <Moon className="w-5 h-5 text-white" />}
         </button>
 
         <button
@@ -150,10 +159,11 @@ export default function Navbar() {
           }}
           aria-label="Menu"
         >
-          {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          {menuOpen ? <X className="w-6 h-6 text-white" /> : <Menu className="w-6 h-6 text-white" />}
         </button>
       </div>
 
+      {/* Mobile Menu */}
       {menuOpen && (
         <div
           ref={menuRef}
@@ -165,19 +175,19 @@ export default function Navbar() {
           className="absolute top-16 left-0 w-full shadow-lg z-40"
         >
           <div className="flex flex-col gap-4 px-6 py-4">
-            <Link href="/about" onClick={() => setMenuOpen(false)} style={{ color: theme.foreground }}>About</Link>
-            <Link href="/book" onClick={() => setMenuOpen(false)} style={{ color: theme.foreground }}>Book</Link>
-            <Link href="/contact" onClick={() => setMenuOpen(false)} style={{ color: theme.foreground }}>Contact</Link>
+            <Link href="/about" onClick={() => setMenuOpen(false)} className="hover:text-orange-300">About</Link>
+            <Link href="/book" onClick={() => setMenuOpen(false)} className="hover:text-orange-300">Book</Link>
+            <Link href="/contact" onClick={() => setMenuOpen(false)} className="hover:text-orange-300">Contact</Link>
+
             {user ? (
               <>
-                <Link href="/profile" onClick={() => setMenuOpen(false)} style={{ color: theme.foreground }}>My Profile</Link>
+                <Link href="/profile" onClick={() => setMenuOpen(false)} className="hover:text-orange-300">My Profile</Link>
                 <button
                   onClick={() => {
                     signOut();
                     setMenuOpen(false);
                   }}
-                  className="text-left"
-                  style={{ color: theme.foreground }}
+                  className="text-left hover:text-orange-300"
                 >
                   Logout
                 </button>
@@ -187,7 +197,7 @@ export default function Navbar() {
                 href="/auth"
                 onClick={() => setMenuOpen(false)}
                 style={{
-                  backgroundColor: theme.primary,
+                  backgroundColor: theme.accent,
                   color: '#fff',
                   padding: '8px 16px',
                   borderRadius: '6px',

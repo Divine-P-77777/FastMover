@@ -5,7 +5,7 @@ import type { NextRequest } from 'next/server';
 const protectedRoutes = [
   '/admin',
   '/driver/dashboard',
-  '/client/dashboard',
+  '/client/home',
 ];
 
 export function middleware(request: NextRequest) {
@@ -31,7 +31,7 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/admin/:path*',
-    '/client/dashboard/:path*',
+    '/client/profile/:path*',
     '/driver/dashboard/:path*',
   ],
 };

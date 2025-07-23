@@ -21,25 +21,53 @@ export default function AuthCallback() {
       }
 
       if (type === 'recovery') {
-        // ✅ If password reset
         router.push('/auth/reset-password');
-      } else {
-        // ✅ For OAuth (e.g., Google) login success
-        const { data, error } = await supabase.auth.getSession();
+        return;
+      }
 
-        if (error || !data.session) {
-          router.push('/auth?error=Session not found');
-        } else {
-          const role = data.session.user?.user_metadata?.role;
+      const { data, error } = await supabase.auth.getSession();
 
-          if (role === 'admin') {
-            router.push('/admin');
-          } else if (role === 'driver') {
-            router.push('/driver/dashboard');
-          } else {
-            router.push('/client/home');
-          }
+      if (error || !data.session) {
+        router.push('/auth?error=Session not found');
+        return;
+      }
+
+      const user = data.session.user;
+
+      // Fetch user details from your own users table
+      const { data: userRecord, error: userError } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (userError || !userRecord) {
+        // Insert a default user if not found (Google login first time)
+        const { error: insertError } = await supabase.from('users').insert({
+          id: user.id,
+          email: user.email,
+          role: 'client', // default role
+          username: user.user_metadata?.username || user.email?.split('@')[0], // fallback username
+        });
+
+        if (insertError) {
+          router.push('/auth?error=Could not initialize user');
+          return;
         }
+
+        router.push('/client/home');
+        return;
+      }
+
+      // Redirect based on existing role
+      const role = userRecord.role;
+
+      if (role === 'admin') {
+        router.push('/admin');
+      } else if (role === 'driver') {
+        router.push('/driver/dashboard');
+      } else {
+        router.push('/client/home');
       }
     };
 

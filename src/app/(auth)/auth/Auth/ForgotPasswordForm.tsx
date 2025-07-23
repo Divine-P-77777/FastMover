@@ -5,8 +5,8 @@ import { useForm } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Loader2, X } from 'lucide-react';
 
-import  Button  from '@/components/ui/Button';
-import  Input  from '@/components/ui/Input';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input';
 
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -102,11 +102,12 @@ export default function ForgotPasswordForm({
                     })}
                     id="reset-email"
                     type="email"
-                    value={email}
+                    defaultValue={email}        // ✅ This works with react-hook-form
                     readOnly={isEmailReadOnly}
                     placeholder="Enter your email"
                     className="pl-10"
                   />
+
                 </div>
                 {errors.email && (
                   <p className="text-sm text-organe-500">{errors.email.message}</p>

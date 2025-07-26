@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/supabase/client';
 import { toast } from 'react-hot-toast';
+import { MapPin } from 'lucide-react';
+import Link from 'next/link';
 
 interface Driver {
   id: number;
@@ -16,9 +18,20 @@ interface Driver {
   available: boolean;
 }
 
+interface AssignedOrder {
+  id: string;
+  pickup_location: string;
+  drop_location: string;
+  vehicle: string;
+  pickup_lat: number;
+  pickup_lng: number;
+  status: string;
+}
+
 export default function DriverHomePage() {
   const router = useRouter();
   const [driver, setDriver] = useState<Driver | null>(null);
+  const [assignedOrder, setAssignedOrder] = useState<AssignedOrder | null>(null);
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState(false);
 
@@ -29,7 +42,6 @@ export default function DriverHomePage() {
 
   const fetchDriver = async () => {
     setLoading(true);
-
     const { data: authData, error: authError } = await supabase.auth.getUser();
 
     if (authError || !authData?.user) {
@@ -51,6 +63,18 @@ export default function DriverHomePage() {
       setDriver(null);
     } else {
       setDriver(driverData);
+
+      const { data: orderData } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('driver_id', userId)
+        .not('status', 'in.(completed,cancelled)')
+        .limit(1)
+        .maybeSingle();
+
+      if (orderData) {
+        setAssignedOrder(orderData);
+      }
     }
 
     setLoading(false);
@@ -83,7 +107,6 @@ export default function DriverHomePage() {
     return (
       <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center space-y-4">
         <p>Loading driver info...</p>
-  
       </div>
     );
   }
@@ -103,9 +126,9 @@ export default function DriverHomePage() {
   }
 
   return (
-    <div className="min-h-screen p-6 space-y-6 bg-gray-50">
+    <div className="min-h-screen p-6 space-y-6 bg-gray-50 dark:bg-black dark:text-white">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-cyan-700">
+        <h1 className="text-3xl font-bold text-cyan-700 dark:text-cyan-400">
           Welcome, {driver.driver_name}
         </h1>
         <button
@@ -116,7 +139,7 @@ export default function DriverHomePage() {
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-md border p-6 space-y-4">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-md border dark:border-gray-700 p-6 space-y-4">
         <p><strong>Username:</strong> {driver.username}</p>
         <p><strong>Vehicle Number:</strong> {driver.vehicle_number}</p>
         <p><strong>License Number:</strong> {driver.license_number ?? 'N/A'}</p>
@@ -129,7 +152,7 @@ export default function DriverHomePage() {
               type="checkbox"
               checked={driver.available}
               onChange={toggleAvailability}
-              disabled={toggling}
+              disabled={!!assignedOrder || toggling}
               className="sr-only peer"
             />
             <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-green-500 transition"></div>
@@ -137,9 +160,28 @@ export default function DriverHomePage() {
         </div>
       </div>
 
+      {assignedOrder && (
+        <div className="bg-white dark:bg-gray-900 border dark:border-gray-700 rounded-2xl shadow-md p-6 space-y-3">
+          <h2 className="text-xl font-semibold">🚚 Assigned Order</h2>
+          <p><strong>Pickup:</strong> {assignedOrder.pickup_location}</p>
+          <p><strong>Drop:</strong> {assignedOrder.drop_location}</p>
+          <p><strong>Vehicle:</strong> {assignedOrder.vehicle}</p>
+          <p><strong>Status:</strong> {assignedOrder.status}</p>
+
+          <a
+            href={`https://www.google.com/maps/dir/?api=1&destination=${assignedOrder.pickup_lat},${assignedOrder.pickup_lng}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex gap-2 items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl mt-2"
+          >
+            <MapPin size={18} /> Navigate to Pickup
+          </a>
+        </div>
+      )}
+
       <div className="grid grid-cols-2 gap-4">
-        <a href="#" className="p-4 bg-white rounded-xl shadow text-center font-semibold hover:bg-cyan-50 border">History</a>
-        <a href="#" className="p-4 bg-white rounded-xl shadow text-center font-semibold hover:bg-cyan-50 border">Checkpoints</a>
+        <Link href="#" className="p-4 bg-white dark:bg-gray-800 rounded-xl shadow text-center font-semibold hover:bg-cyan-50 dark:hover:bg-gray-700 border">History</Link>
+        <Link href="/driver/checkpoints" className="p-4 bg-white dark:bg-gray-800 rounded-xl shadow text-center font-semibold hover:bg-cyan-50 dark:hover:bg-gray-700 border">Checkpoints</Link>
       </div>
     </div>
   );
